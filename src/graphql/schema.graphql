@@ -1,0 +1,31 @@
+# scalar EmailAddress
+
+type Query {
+  allUser: [User!]!
+  getUser(Email: String!): User
+}
+
+type Mutation {
+  createUser(Email: String!, pw: String!, name: String!): Boolean!
+  deleteUser(Email: String!): Boolean!
+  updateUser(Email: String!, pw: String!, name: String!): User!
+}
+
+# Schema Types
+type User {
+  id: String!
+  Email: String!
+  pw: String!
+  name: String!
+}
+
+# type note {
+#   note_id: String!
+#   note_name: String!
+# }
+
+# type page {
+#   page_id: String!
+#   page_titpe: String!
+#   page_content: String!
+# }
