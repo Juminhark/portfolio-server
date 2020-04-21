@@ -6,6 +6,8 @@
 yarn init -y
 
 yarn add graphql-yoga mongoose dotenv
+
+yarn add jsonwebtoken bcryptjs
 ```
 
 ## devDependencies
@@ -18,5 +20,7 @@ yarn add graphql-yoga mongoose dotenv
 
 ## reference
 
+- [`graphql-yoga mongodb example`](https://github.com/prisma-labs/graphql-yoga/tree/master/examples/mongodb)
 - [`heroku - dotenv`](https://velog.io/@suseodd/Heroku%EC%97%90-.env%ED%8C%8C%EC%9D%BC-%EC%A0%81%EC%9A%A9-20k621f03d)
 - [`merng-post-server`](https://github.com/Juminhark/merng-post/tree/master/server)
+- [`babel-cli 활용 예`](https://github.com/Juminhark/apollo-graphql_movie)

@@ -1,22 +1,29 @@
-# scalar EmailAddress
-
 type Query {
   allUser: [User!]!
-  getUser(Email: String!): User
+  getUser(userId: ID!): User
 }
 
 type Mutation {
-  createUser(Email: String!, pw: String!, name: String!): Boolean!
-  deleteUser(Email: String!): Boolean!
-  updateUser(Email: String!, pw: String!, name: String!): User!
+  createUser(registerInput: RegisterInput): User!
+  deleteUser(email: String!): Boolean!
+  # updateUser(email: String!, pw: String!, username: String!): User!
 }
 
 # Schema Types
 type User {
-  id: String!
-  Email: String!
+  id: ID!
+  email: String!
   pw: String!
-  name: String!
+  username: String!
+  token: String!
+}
+
+# Input
+input RegisterInput {
+  email: String!
+  pw: String!
+  confirmPw: String!
+  username: String!
 }
 
 # type note {
@@ -29,3 +36,5 @@ type User {
 #   page_titpe: String!
 #   page_content: String!
 # }
+
+# scalar emailAddress
