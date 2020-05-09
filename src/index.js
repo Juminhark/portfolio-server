@@ -1,34 +1,19 @@
-import { GraphQLServer } from 'graphql-yoga'
-import { startDB, models } from './db';
+// apollo-server
+import { ApolloServer } from 'apollo-server';
+import typeDefs from './graphql/schema';
 import resolvers from './graphql/resolvers';
-import dotenv from 'dotenv';
-dotenv.config();
+// mongoose
+import { startDB } from './db';
 
 // DB Connect //
 const db = startDB({
-  connectURL: process.env.ATLAS_URI
-})
-
-const context = {
-  models,
-  db,
-}
-
-const server = new GraphQLServer({ 
-  typeDefs: `${__dirname}/graphql/schema.graphql`, 
-  resolvers,
-  context,
+  connectURL:
+    'mongodb+srv://admin:admin@cluster0-czmgd.gcp.mongodb.net/test?retryWrites=true&w=majority',
 });
 
-// options //
-const options = {
-  port: process.env.PORT
-}
+const server = new ApolloServer({ typeDefs, resolvers, db });
 
-server.start(options, ({ port }) =>
-  console.log(
-    `Server started, http://localhost:${port}`,
-  ),
-)
-
-
+// The `listen` method launches a web server.
+server.listen({ port: 4000 }).then(({ url }) => {
+  console.log(`🚀  Server ready at ${url}`);
+});
