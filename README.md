@@ -1,6 +1,6 @@
 # portfolio-note-server
 
-# 1.0.0 : server - client 생성과 연결에 중점.
+## 1.0.0 : server - client 생성과 연결에 중점.
 
 - [`Apollo-Server`](https://www.apollographql.com/docs/apollo-server/getting-started/)
 
@@ -196,3 +196,9 @@ yarn add graphql-yoga mongoose dotenv jsonwebtoken bcryptjs
 ## reference
 
 - [`heroku - dotenv`](https://velog.io/@suseodd/Heroku%EC%97%90-.env%ED%8C%8C%EC%9D%BC-%EC%A0%81%EC%9A%A9-20k621f03d)
+
+## [graphql-manager](https://engine.apollographql.com/org)
+
+```sh
+npx apollo service:push --graph=Juminhark-7612 --key=user:gh.Juminhark:bQVB2ZAQwxJZn0A1YQa0_Q --endpoint=http://localhost:4000
+```
