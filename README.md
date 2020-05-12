@@ -182,20 +182,40 @@ const resolvers = {
 export default resolvers;
 ```
 
-```sh
-
-yarn add graphql-yoga mongoose dotenv jsonwebtoken bcryptjs
-```
-
 ## dotenv
 
-## password
+```sh
+yarn add dotenv
+```
 
-## vaild
+```ts
+// index.js
+import dotenv from 'dotenv';
+dotenv.config();
+
+const db = startDB({
+  connectURL: process.env.DB_URL,
+});
+
+// .env
+DB_URL=[cloud.mongodb connect url]
+```
+
+## bcrypt-password
+
+```sh
+ bcryptjs
+```
+
+## vaildsd
 
 ## reference
 
 - [`heroku - dotenv`](https://velog.io/@suseodd/Heroku%EC%97%90-.env%ED%8C%8C%EC%9D%BC-%EC%A0%81%EC%9A%A9-20k621f03d)
+
+```sh
+yarn add jsonwebtoken
+```
 
 ## [graphql-manager](https://engine.apollographql.com/org)
 

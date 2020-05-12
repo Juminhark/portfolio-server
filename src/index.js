@@ -4,11 +4,13 @@ import typeDefs from './graphql/schema';
 import resolvers from './graphql/resolvers';
 // mongoose
 import { startDB } from './db';
+// dotenv
+import dotenv from 'dotenv';
+dotenv.config();
 
 // DB Connect //
 const db = startDB({
-  connectURL:
-    'mongodb+srv://admin:admin@cluster0-czmgd.gcp.mongodb.net/test?retryWrites=true&w=majority',
+  connectURL: process.env.DB_URL,
 });
 
 const server = new ApolloServer({ typeDefs, resolvers, db });
