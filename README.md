@@ -145,6 +145,7 @@ export default mongoose.model('User', userSchema);
 ```ts
 // graphql/resolvers.js
 import User from '../db/models/user.model';
+import { UserInputError } from 'apollo-server';
 
 const resolvers = {
   Query: {
@@ -162,13 +163,23 @@ const resolvers = {
       _,
       { registerInput: { username, email, pw, confirmPw } }
     ) => {
+      // Make sure user doesnt already exist
+      const user = await User.findOne({ username });
+      if (user) {
+        throw new UserInputError('Username is taken', {
+          errors: {
+            username: 'This username is taken',
+          },
+        });
+      }
+
       const newUser = new User({
         email,
         pw,
         username,
       });
 
-      // save the User
+      // Save the User
       const res = await newUser.save();
 
       return {
@@ -204,18 +215,100 @@ DB_URL=[cloud.mongodb connect url]
 ## bcrypt-password
 
 ```sh
- bcryptjs
+yarn add bcryptjs
 ```
 
-## vaildsd
+```ts
+// graphql/resolvers.js
+import bcrypt from 'bcryptjs';
 
-## reference
+password = await bcrypt.hash(password, 12);
+```
 
-- [`heroku - dotenv`](https://velog.io/@suseodd/Heroku%EC%97%90-.env%ED%8C%8C%EC%9D%BC-%EC%A0%81%EC%9A%A9-20k621f03d)
+## vaildator
+
+```ts
+// util/validators.js
+const validateRegisterInput = (username, email, password, confirmPassword) => {
+  const errors = {};
+  // username 비였을 때
+  if (username.trim() === '') {
+    errors.username = 'Username must not be empty';
+  }
+  // email 비였을 때
+  if (email.trim() === '') {
+    errors.email = 'Email must not be empty';
+  } else {
+    // email 형식
+    const regEx = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
+    // email이 형식에 맞지 않을 때
+    if (!email.match(regEx)) {
+      errors.email = 'Email must be a valid email address';
+    }
+  }
+  // password 비였을 때
+  if (password === '') {
+    errors.password = 'Password must not empty';
+    // password 와 confirmPassword 다를 때
+  } else if (password !== confirmPassword) {
+    errors.confirmPassword = 'Passwords must match';
+  }
+
+  return {
+    errors,
+    valid: Object.keys(errors).length < 1,
+  };
+};
+
+export { validateRegisterInput };
+```
+
+```ts
+// graphql/resolvers.js
+import { validateRegisterInput } from '../util/validators';
+
+...
+
+// Validate user data
+const { valid, errors } = validateRegisterInput(
+  username,
+  email,
+  password,
+  confirmPassword
+);
+if (!valid) {
+  throw new UserInputError('Errors', { errors });
+}
+```
+
+## [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken)
 
 ```sh
 yarn add jsonwebtoken
 ```
+
+```ts
+const generateToken = (user) => {
+  return jwt.sign(
+    {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+    },
+    SECRET_KEY,
+    { expiresIn: '1h' }
+  );
+};
+
+// Create login token
+const token = generateToken(res);
+```
+
+## [auth0](https://auth0.com)
+
+## reference
+
+- [`heroku - dotenv`](https://velog.io/@suseodd/Heroku%EC%97%90-.env%ED%8C%8C%EC%9D%BC-%EC%A0%81%EC%9A%A9-20k621f03d)
 
 ## [graphql-manager](https://engine.apollographql.com/org)
 

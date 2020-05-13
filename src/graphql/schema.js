@@ -13,15 +13,15 @@ const typeDefs = gql`
   type User {
     id: ID!
     email: String!
-    pw: String!
+    password: String!
     username: String!
   }
 
   # Input
   input RegisterInput {
     email: String!
-    pw: String!
-    confirmPw: String!
+    password: String!
+    confirmPassword: String!
     username: String!
   }
 `;
