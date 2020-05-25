@@ -29,11 +29,11 @@ const validateRegisterInput = (username, email, password, confirmPassword) => {
   };
 };
 
-const validateLoginInput = (username, password) => {
+const validateLoginInput = (email, password) => {
   const errors = {};
-  // TODO : username 비였을 때
-  if (username.trim() === '') {
-    errors.username = 'Username must not be empty';
+  // TODO : email 비였을 때
+  if (email.trim() === '') {
+    errors.email = 'email must not be empty';
   }
   // TODO : password 비였을 때
   if (password.trim() === '') {

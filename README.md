@@ -304,7 +304,33 @@ const generateToken = (user) => {
 const token = generateToken(res);
 ```
 
-## [auth0](https://auth0.com)
+## [Authentication/Authorization](https://www.daleseo.com/graphql-apollo-server-auth/)
+
+### AuthenticationError, ForbiddenError : 인증실패 / 인가 실패
+
+- context 레벨 인증
+  client 에서 인증 token이 넘어오지않거나, 넘어온 token이 유효하지 않는 경우에는 요청을 무조건 차단.
+
+context 옵션에 할당된 함수는 모든 요청에 대해 호출이 되고 요청 정보를 인자로 받기 때문에 인증 토큰을 검증하는 장소로 접합.
+
+```ts
+import { AuthenticationError, ForbiddenError } from 'apollo-server';
+
+const auth = ({ req }) => {
+  if (!req.headers.authorization) throw new AuthenticationError('mssing token');
+
+  const token = req.headers.authorization.substr(7);
+  const user = users.find((user) => user.token === token);
+  if (!user) throw new AuthenticationError('invalid token');
+  return { user };
+};
+
+const context = { db, auth };
+
+const server = new ApolloServer({ typeDefs, resolvers, context });
+```
+
+Bearer 인증 방식에서는
 
 ## reference
 

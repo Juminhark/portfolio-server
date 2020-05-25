@@ -7,7 +7,7 @@ import { validateRegisterInput } from '../util/validators';
 import dotenv from 'dotenv';
 dotenv.config();
 
-// TODO : login or Register. create Token
+// TODO : login or Register. create Token. server-resolvers 단계에서 인증관리
 const generateToken = (user) => {
   return jwt.sign(
     {
@@ -32,7 +32,7 @@ const resolvers = {
     },
   },
   Mutation: {
-    createUser: async (
+    register: async (
       _,
       { registerInput: { username, email, password, confirmPassword } }
     ) => {
@@ -47,12 +47,12 @@ const resolvers = {
         throw new UserInputError('Errors', { errors });
       }
 
-      // TODO : Make sure user doesnt already exist
-      const user = await User.findOne({ username });
+      // TODO : Make sure user doesnt already exist. 동명이인이 있을수있으니 email로 체크
+      const user = await User.findOne({ email });
       if (user) {
-        throw new UserInputError('Username is taken', {
+        throw new UserInputError('email is taken', {
           errors: {
-            username: 'This username is taken',
+            email: 'This email is taken',
           },
         });
       }
@@ -64,20 +64,47 @@ const resolvers = {
         email,
         password,
         username,
-        createdAt: new Date().toISOString(),
       });
 
       // TODO : Save the user
       const res = await newUser.save();
 
-      console.log(res);
-
       // TODO : Create login token
       const token = generateToken(res);
 
+      // TODO : 새로운 user의 정보반환. res(email, password, username), id, token
       return {
         ...res._doc,
         id: res._id,
+        token,
+      };
+    },
+
+    login: async (_, { email, password }) => {
+      const { errors, valid } = validateLoginInput(email, password);
+
+      if (!valid) {
+        throw new UserInputError('Errors', { errors });
+      }
+
+      const user = await User.findOne({ email });
+
+      if (!user) {
+        errors.general = 'User not found';
+        throw new UserInputError('User not found', { errors });
+      }
+
+      const match = await bcrypt.compare(password, user.password);
+      if (!match) {
+        errors.general = 'Wrong crendetials';
+        throw new UserInputError('Wrong crendetials', { errors });
+      }
+
+      const token = generateToken(user);
+
+      return {
+        ...user._doc,
+        id: user._id,
         token,
       };
     },

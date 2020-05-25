@@ -6,23 +6,22 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    createUser(registerInput: RegisterInput): User!
+    register(registerInput: RegisterInput): User!
+    login(email: String!, password: String!): User!
   }
 
-  # Schema Types
   type User {
     id: ID!
     email: String!
-    password: String!
     username: String!
+    token: String!
   }
 
-  # Input
   input RegisterInput {
+    username: String!
     email: String!
     password: String!
     confirmPassword: String!
-    username: String!
   }
 `;
 

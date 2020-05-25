@@ -1,5 +1,9 @@
 // apollo-server
-import { ApolloServer } from 'apollo-server';
+import {
+  ApolloServer,
+  AuthenticationError,
+  ForbiddenError,
+} from 'apollo-server';
 import typeDefs from './graphql/schema';
 import resolvers from './graphql/resolvers';
 // mongoose
@@ -13,7 +17,9 @@ const db = startDB({
   connectURL: process.env.DB_URL,
 });
 
-const server = new ApolloServer({ typeDefs, resolvers, db });
+const context = { db };
+
+const server = new ApolloServer({ typeDefs, resolvers, context });
 
 // The `listen` method launches a web server.
 server.listen({ port: 4000 }).then(({ url }) => {
