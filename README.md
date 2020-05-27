@@ -51,23 +51,23 @@ import mongoose from 'mongoose';
 mongoose.Promise = global.Promise;
 
 export const startDB = ({ connectURL }) =>
-  mongoose.connect(`${connectURL}`, {
-    useNewUrlParser: true,
-  });
+	mongoose.connect(`${connectURL}`, {
+		useNewUrlParser: true,
+	});
 
 const connection = mongoose.connection;
 
 connection.on('error', console.error.bind(console, 'connection error:'));
 
 connection.once('open', () => {
-  console.log('MongoDB database connection established successfully');
+	console.log('MongoDB database connection established successfully');
 });
 
 // index.js
 import { startDB } from './db';
 
 const db = startDB({
-  connectURL: [mongoDB - cluster - url],
+	connectURL: [mongoDB - cluster - url],
 });
 
 const server = new ApolloServer({ typeDefs, resolvers, db });
@@ -82,29 +82,29 @@ const server = new ApolloServer({ typeDefs, resolvers, db });
 import { gql } from 'apollo-server';
 
 const typeDefs = gql`
-  type Query {
-    allUser: [User!]!
-  }
+	type Query {
+		allUser: [User!]!
+	}
 
-  type Mutation {
-    createUser(registerInput: RegisterInput): User!
-  }
+	type Mutation {
+		createUser(registerInput: RegisterInput): User!
+	}
 
-  # Schema Types
-  type User {
-    id: ID!
-    email: String!
-    pw: String!
-    username: String!
-  }
+	# Schema Types
+	type User {
+		id: ID!
+		email: String!
+		pw: String!
+		username: String!
+	}
 
-  # Input
-  input RegisterInput {
-    email: String!
-    pw: String!
-    confirmPw: String!
-    username: String!
-  }
+	# Input
+	input RegisterInput {
+		email: String!
+		pw: String!
+		confirmPw: String!
+		username: String!
+	}
 `;
 
 export default typeDefs;
@@ -117,24 +117,24 @@ export default typeDefs;
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema(
-  {
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    pw: {
-      type: String,
-      required: true,
-    },
-    username: {
-      type: String,
-      required: true,
-    },
-  },
-  {
-    timestamps: true,
-  }
+	{
+		email: {
+			type: String,
+			required: true,
+			unique: true,
+		},
+		pw: {
+			type: String,
+			required: true,
+		},
+		username: {
+			type: String,
+			required: true,
+		},
+	},
+	{
+		timestamps: true,
+	}
 );
 
 export default mongoose.model('User', userSchema);
@@ -148,46 +148,46 @@ import User from '../db/models/user.model';
 import { UserInputError } from 'apollo-server';
 
 const resolvers = {
-  Query: {
-    allUser: async () => {
-      try {
-        const users = await User.find();
-        return users;
-      } catch (err) {
-        throw new Error(err);
-      }
-    },
-  },
-  Mutation: {
-    createUser: async (
-      _,
-      { registerInput: { username, email, pw, confirmPw } }
-    ) => {
-      // Make sure user doesnt already exist
-      const user = await User.findOne({ username });
-      if (user) {
-        throw new UserInputError('Username is taken', {
-          errors: {
-            username: 'This username is taken',
-          },
-        });
-      }
+	Query: {
+		allUser: async () => {
+			try {
+				const users = await User.find();
+				return users;
+			} catch (err) {
+				throw new Error(err);
+			}
+		},
+	},
+	Mutation: {
+		createUser: async (
+			_,
+			{ registerInput: { username, email, pw, confirmPw } }
+		) => {
+			// Make sure user doesnt already exist
+			const user = await User.findOne({ username });
+			if (user) {
+				throw new UserInputError('Username is taken', {
+					errors: {
+						username: 'This username is taken',
+					},
+				});
+			}
 
-      const newUser = new User({
-        email,
-        pw,
-        username,
-      });
+			const newUser = new User({
+				email,
+				pw,
+				username,
+			});
 
-      // Save the User
-      const res = await newUser.save();
+			// Save the User
+			const res = await newUser.save();
 
-      return {
-        ...res._doc,
-        id: res._id,
-      };
-    },
-  },
+			return {
+				...res._doc,
+				id: res._id,
+			};
+		},
+	},
 };
 
 export default resolvers;
@@ -230,34 +230,34 @@ password = await bcrypt.hash(password, 12);
 ```ts
 // util/validators.js
 const validateRegisterInput = (username, email, password, confirmPassword) => {
-  const errors = {};
-  // username 비였을 때
-  if (username.trim() === '') {
-    errors.username = 'Username must not be empty';
-  }
-  // email 비였을 때
-  if (email.trim() === '') {
-    errors.email = 'Email must not be empty';
-  } else {
-    // email 형식
-    const regEx = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
-    // email이 형식에 맞지 않을 때
-    if (!email.match(regEx)) {
-      errors.email = 'Email must be a valid email address';
-    }
-  }
-  // password 비였을 때
-  if (password === '') {
-    errors.password = 'Password must not empty';
-    // password 와 confirmPassword 다를 때
-  } else if (password !== confirmPassword) {
-    errors.confirmPassword = 'Passwords must match';
-  }
+	const errors = {};
+	// username 비였을 때
+	if (username.trim() === '') {
+		errors.username = 'Username must not be empty';
+	}
+	// email 비였을 때
+	if (email.trim() === '') {
+		errors.email = 'Email must not be empty';
+	} else {
+		// email 형식
+		const regEx = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
+		// email이 형식에 맞지 않을 때
+		if (!email.match(regEx)) {
+			errors.email = 'Email must be a valid email address';
+		}
+	}
+	// password 비였을 때
+	if (password === '') {
+		errors.password = 'Password must not empty';
+		// password 와 confirmPassword 다를 때
+	} else if (password !== confirmPassword) {
+		errors.confirmPassword = 'Passwords must match';
+	}
 
-  return {
-    errors,
-    valid: Object.keys(errors).length < 1,
-  };
+	return {
+		errors,
+		valid: Object.keys(errors).length < 1,
+	};
 };
 
 export { validateRegisterInput };
@@ -289,15 +289,15 @@ yarn add jsonwebtoken
 
 ```ts
 const generateToken = (user) => {
-  return jwt.sign(
-    {
-      id: user.id,
-      email: user.email,
-      username: user.username,
-    },
-    SECRET_KEY,
-    { expiresIn: '1h' }
-  );
+	return jwt.sign(
+		{
+			id: user.id,
+			email: user.email,
+			username: user.username,
+		},
+		SECRET_KEY,
+		{ expiresIn: '1h' }
+	);
 };
 
 // Create login token
@@ -317,12 +317,12 @@ context 옵션에 할당된 함수는 모든 요청에 대해 호출이 되고 �
 import { AuthenticationError, ForbiddenError } from 'apollo-server';
 
 const auth = ({ req }) => {
-  if (!req.headers.authorization) throw new AuthenticationError('mssing token');
+	if (!req.headers.authorization) throw new AuthenticationError('mssing token');
 
-  const token = req.headers.authorization.substr(7);
-  const user = users.find((user) => user.token === token);
-  if (!user) throw new AuthenticationError('invalid token');
-  return { user };
+	const token = req.headers.authorization.substr(7);
+	const user = users.find((user) => user.token === token);
+	if (!user) throw new AuthenticationError('invalid token');
+	return { user };
 };
 
 const context = { db, auth };
@@ -341,3 +341,13 @@ Bearer 인증 방식에서는
 ```sh
 npx apollo service:push --graph=Juminhark-7612 --key=user:gh.Juminhark:bQVB2ZAQwxJZn0A1YQa0_Q --endpoint=http://localhost:4000
 ```
+
+# download
+
+- npm install
+
+```sh
+> npm install
+```
+
+- create .env
