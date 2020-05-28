@@ -1,8 +1,12 @@
 import bcrypt from 'bcryptjs';
-import { UserInputError } from 'apollo-server';
+import { AuthenticationError, UserInputError } from 'apollo-server';
 import jwt from 'jsonwebtoken';
+// model
 import User from '../db/models/user.model';
+import Project from '../db/models/project.model';
+// util
 import { validateRegisterInput, validateLoginInput } from '../util/validators';
+import checkAuth from '../util/check-auth';
 // dotenv
 import dotenv from 'dotenv';
 dotenv.config();
@@ -26,6 +30,27 @@ const resolvers = {
 			try {
 				const users = await User.find();
 				return users;
+			} catch (err) {
+				throw new Error(err);
+			}
+		},
+		getProjects: async () => {
+			try {
+				// sort() => Project list 순서 교정
+				const projects = await Project.find().sort({ createdAt: -1 });
+				return posts;
+			} catch (err) {
+				throw new Error(err);
+			}
+		},
+		getProject: async (_, { projectId }) => {
+			try {
+				const project = await Project.findById(projectId);
+				if (project) {
+					return project;
+				} else {
+					throw new Error('Project not found');
+				}
 			} catch (err) {
 				throw new Error(err);
 			}
@@ -107,6 +132,49 @@ const resolvers = {
 				id: user._id,
 				token,
 			};
+		},
+		async createProject(_, { title, content }, context) {
+			const user = checkAuth(context);
+
+			if (body.trim() === '') {
+				throw new Error('Project body must not be empty');
+			}
+
+			const newProject = new Project({
+				title,
+				content,
+				user: user.id,
+				username: user.username,
+				updated: new Date().toISOString(),
+			});
+
+			const project = await newProject.save();
+
+			context.pubsub.publish('NEW_Project', {
+				newProject: project,
+			});
+
+			return project;
+		},
+		async deleteProject(_, { projectId }, context) {
+			const user = checkAuth(context);
+
+			try {
+				const project = await Project.findById(projectId);
+				if (user.username === project.username) {
+					await project.delete();
+					return 'Project deleted successfully';
+				} else {
+					throw new AuthenticationError('Action not allowed');
+				}
+			} catch (err) {
+				throw new Error(err);
+			}
+		},
+	},
+	Subscription: {
+		newProject: {
+			subscribe: (_, __, { pubsub }) => pubsub.asyncIterator('NEW_PROJECT'),
 		},
 	},
 };

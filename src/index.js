@@ -1,9 +1,5 @@
 // apollo-server
-import {
-  ApolloServer,
-  AuthenticationError,
-  ForbiddenError,
-} from 'apollo-server';
+import { ApolloServer, PubSub } from 'apollo-server';
 import typeDefs from './graphql/schema';
 import resolvers from './graphql/resolvers';
 // mongoose
@@ -14,14 +10,18 @@ dotenv.config();
 
 // DB Connect //
 const db = startDB({
-  connectURL: process.env.DB_URL,
+	connectURL: process.env.DB_URL,
 });
 
-const context = { db };
+const pubsub = new PubSub();
 
-const server = new ApolloServer({ typeDefs, resolvers, context });
+const server = new ApolloServer({
+	typeDefs,
+	resolvers,
+	context: ({ req }) => ({ req, pubsub, db }),
+});
 
 // The `listen` method launches a web server.
 server.listen({ port: 4000 }).then(({ url }) => {
-  console.log(`🚀  Server ready at ${url}`);
+	console.log(`🚀  Server ready at ${url}`);
 });

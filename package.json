@@ -1,33 +1,36 @@
 {
-  "name": "portfolio-server",
-  "version": "1.0.0",
-  "main": "index.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Juminhark/portfolio-server.git"
-  },
-  "author": "Juminhark <40381241+Juminhark@users.noreply.github.com>",
-  "license": "MIT",
-  "dependencies": {
-    "apollo-server": "^2.13.0",
-    "bcryptjs": "^2.4.3",
-    "dotenv": "^8.2.0",
-    "graphql": "^15.0.0",
-    "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.9.12"
-  },
-  "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-stage-3": "^6.24.1",
-    "nodemon": "^2.0.3"
-  },
-  "scripts": {
-    "start": "nodemon --exec babel-node src/index.js"
-  },
-  "description": "- [`Apollo-Server`](https://www.apollographql.com/docs/apollo-server/getting-started/)",
-  "bugs": {
-    "url": "https://github.com/Juminhark/portfolio-server/issues"
-  },
-  "homepage": "https://github.com/Juminhark/portfolio-server#readme"
+	"name": "portfolio-server",
+	"version": "1.0.0",
+	"main": "index.js",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Juminhark/portfolio-server.git"
+	},
+	"author": "Juminhark <40381241+Juminhark@users.noreply.github.com>",
+	"license": "MIT",
+	"dependencies": {
+		"apollo-server": "^2.14.0",
+		"bcryptjs": "^2.4.3",
+		"dotenv": "^8.2.0",
+		"graphql": "^15.0.0",
+		"jsonwebtoken": "^8.5.1",
+		"mongoose": "^5.9.16"
+	},
+	"devDependencies": {
+		"@babel/cli": "^7.10.0",
+		"@babel/core": "^7.10.0",
+		"@babel/node": "^7.8.7",
+		"@babel/plugin-proposal-class-properties": "^7.8.3",
+		"@babel/preset-env": "^7.10.0",
+		"@babel/preset-react": "^7.10.0",
+		"nodemon": "^2.0.3"
+	},
+	"scripts": {
+		"start": "nodemon --exec babel-node src/index.js"
+	},
+	"description": "- [`Apollo-Server`](https://www.apollographql.com/docs/apollo-server/getting-started/)",
+	"bugs": {
+		"url": "https://github.com/Juminhark/portfolio-server/issues"
+	},
+	"homepage": "https://github.com/Juminhark/portfolio-server#readme"
 }
