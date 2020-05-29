@@ -7,14 +7,13 @@ dotenv.config();
 
 export default (context) => {
 	// context = { ... headers }
-	console.log(context);
 	const authHeader = context.req.headers.authorization;
 	if (authHeader) {
 		// Bearer ....
 		const token = authHeader.split('Bearer ')[1];
 		if (token) {
 			try {
-				const user = jwt.verify(token, SECRET_KEY);
+				const user = jwt.verify(token, process.env.SECRET_KEY);
 				return user;
 			} catch (err) {
 				throw new AuthenticationError('Invalid/Expired token');

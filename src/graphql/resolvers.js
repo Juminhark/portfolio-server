@@ -38,7 +38,7 @@ const resolvers = {
 			try {
 				// sort() => Project list 순서 교정
 				const projects = await Project.find().sort({ createdAt: -1 });
-				return posts;
+				return projects;
 			} catch (err) {
 				throw new Error(err);
 			}
@@ -72,7 +72,7 @@ const resolvers = {
 				throw new UserInputError('Errors', { errors });
 			}
 
-			// TODO : Make sure user doesnt already exist. 동명이인이 있을수있으니 email로 체크
+			// TODO : Make sure user doesn`t already exist. 동명이인이 있을수있으니 email로 체크
 			const user = await User.findOne({ email });
 			if (user) {
 				throw new UserInputError('email is taken', {
@@ -121,8 +121,8 @@ const resolvers = {
 
 			const match = await bcrypt.compare(password, user.password);
 			if (!match) {
-				errors.general = 'Wrong crendetials';
-				throw new UserInputError('Wrong crendetials', { errors });
+				errors.general = 'Wrong credentials';
+				throw new UserInputError('Wrong credentials', { errors });
 			}
 
 			const token = generateToken(user);
@@ -136,8 +136,11 @@ const resolvers = {
 		async createProject(_, { title, content }, context) {
 			const user = checkAuth(context);
 
-			if (body.trim() === '') {
-				throw new Error('Project body must not be empty');
+			if (title.trim() === '') {
+				throw new Error('Project title must not be empty');
+			}
+			if (content.trim() === '') {
+				throw new Error('Project content must not be empty');
 			}
 
 			const newProject = new Project({
