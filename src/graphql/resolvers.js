@@ -11,7 +11,7 @@ import checkAuth from '../util/check-auth';
 import dotenv from 'dotenv';
 dotenv.config();
 
-// TODO : login or Register. create Token. server-resolvers 단계에서 인증관리
+// TODO: login or Register. create Token. server-resolvers 단계에서 인증관리
 const generateToken = (user) => {
 	return jwt.sign(
 		{
@@ -61,7 +61,7 @@ const resolvers = {
 			_,
 			{ registerInput: { username, email, password, confirmPassword } }
 		) => {
-			// TODO : Validate user data
+			// TODO: Validate user data
 			const { valid, errors } = validateRegisterInput(
 				username,
 				email,
@@ -72,7 +72,7 @@ const resolvers = {
 				throw new UserInputError('Errors', { errors });
 			}
 
-			// TODO : Make sure user doesn`t already exist. 동명이인이 있을수있으니 email로 체크
+			// TODO: Make sure user doesn`t already exist. 동명이인이 있을수있으니 email로 체크
 			const user = await User.findOne({ email });
 			if (user) {
 				throw new UserInputError('email is taken', {
@@ -82,7 +82,7 @@ const resolvers = {
 				});
 			}
 
-			// TODO : Hash password
+			// TODO: Hash password
 			password = await bcrypt.hash(password, 12);
 
 			const newUser = new User({
@@ -91,13 +91,13 @@ const resolvers = {
 				username,
 			});
 
-			// TODO : Save the user
+			// TODO: Save the user
 			const res = await newUser.save();
 
-			// TODO : Create login token
+			// TODO: Create login token
 			const token = generateToken(res);
 
-			// TODO : 새로운 user의 정보반환. res(email, password, username), id, token
+			// TODO: 새로운 user의 정보반환. res(email, password, username), id, token
 			return {
 				...res._doc,
 				id: res._id,
