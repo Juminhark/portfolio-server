@@ -153,9 +153,9 @@ const resolvers = {
 
 			const project = await newProject.save();
 
-			context.pubsub.publish('NEW_Project', {
-				newProject: project,
-			});
+			// context.pubsub.publish('NEW_Project', {
+			// 	newProject: project,
+			// });
 
 			return project;
 		},
