@@ -51,23 +51,23 @@ import mongoose from 'mongoose';
 mongoose.Promise = global.Promise;
 
 export const startDB = ({ connectURL }) =>
-	mongoose.connect(`${connectURL}`, {
-		useNewUrlParser: true,
-	});
+  mongoose.connect(`${connectURL}`, {
+    useNewUrlParser: true,
+  });
 
 const connection = mongoose.connection;
 
 connection.on('error', console.error.bind(console, 'connection error:'));
 
 connection.once('open', () => {
-	console.log('MongoDB database connection established successfully');
+  console.log('MongoDB database connection established successfully');
 });
 
 // index.js
 import { startDB } from './db';
 
 const db = startDB({
-	connectURL: [mongoDB - cluster - url],
+  connectURL: [mongoDB - cluster - url],
 });
 
 const server = new ApolloServer({ typeDefs, resolvers, db });
@@ -82,29 +82,29 @@ const server = new ApolloServer({ typeDefs, resolvers, db });
 import { gql } from 'apollo-server';
 
 const typeDefs = gql`
-	type Query {
-		allUser: [User!]!
-	}
+  type Query {
+    allUser: [User!]!
+  }
 
-	type Mutation {
-		createUser(registerInput: RegisterInput): User!
-	}
+  type Mutation {
+    createUser(registerInput: RegisterInput): User!
+  }
 
-	# Schema Types
-	type User {
-		id: ID!
-		email: String!
-		pw: String!
-		username: String!
-	}
+  # Schema Types
+  type User {
+    id: ID!
+    email: String!
+    pw: String!
+    username: String!
+  }
 
-	# Input
-	input RegisterInput {
-		email: String!
-		pw: String!
-		confirmPw: String!
-		username: String!
-	}
+  # Input
+  input RegisterInput {
+    email: String!
+    pw: String!
+    confirmPw: String!
+    username: String!
+  }
 `;
 
 export default typeDefs;
@@ -117,24 +117,24 @@ export default typeDefs;
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema(
-	{
-		email: {
-			type: String,
-			required: true,
-			unique: true,
-		},
-		pw: {
-			type: String,
-			required: true,
-		},
-		username: {
-			type: String,
-			required: true,
-		},
-	},
-	{
-		timestamps: true,
-	}
+  {
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    pw: {
+      type: String,
+      required: true,
+    },
+    username: {
+      type: String,
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
 );
 
 export default mongoose.model('User', userSchema);
@@ -148,46 +148,46 @@ import User from '../db/models/user.model';
 import { UserInputError } from 'apollo-server';
 
 const resolvers = {
-	Query: {
-		allUser: async () => {
-			try {
-				const users = await User.find();
-				return users;
-			} catch (err) {
-				throw new Error(err);
-			}
-		},
-	},
-	Mutation: {
-		createUser: async (
-			_,
-			{ registerInput: { username, email, pw, confirmPw } }
-		) => {
-			// Make sure user doesnt already exist
-			const user = await User.findOne({ username });
-			if (user) {
-				throw new UserInputError('Username is taken', {
-					errors: {
-						username: 'This username is taken',
-					},
-				});
-			}
+  Query: {
+    allUser: async () => {
+      try {
+        const users = await User.find();
+        return users;
+      } catch (err) {
+        throw new Error(err);
+      }
+    },
+  },
+  Mutation: {
+    createUser: async (
+      _,
+      { registerInput: { username, email, pw, confirmPw } }
+    ) => {
+      // Make sure user doesnt already exist
+      const user = await User.findOne({ username });
+      if (user) {
+        throw new UserInputError('Username is taken', {
+          errors: {
+            username: 'This username is taken',
+          },
+        });
+      }
 
-			const newUser = new User({
-				email,
-				pw,
-				username,
-			});
+      const newUser = new User({
+        email,
+        pw,
+        username,
+      });
 
-			// Save the User
-			const res = await newUser.save();
+      // Save the User
+      const res = await newUser.save();
 
-			return {
-				...res._doc,
-				id: res._id,
-			};
-		},
-	},
+      return {
+        ...res._doc,
+        id: res._id,
+      };
+    },
+  },
 };
 
 export default resolvers;
@@ -230,34 +230,34 @@ password = await bcrypt.hash(password, 12);
 ```ts
 // util/validators.js
 const validateRegisterInput = (username, email, password, confirmPassword) => {
-	const errors = {};
-	// username 비였을 때
-	if (username.trim() === '') {
-		errors.username = 'Username must not be empty';
-	}
-	// email 비였을 때
-	if (email.trim() === '') {
-		errors.email = 'Email must not be empty';
-	} else {
-		// email 형식
-		const regEx = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
-		// email이 형식에 맞지 않을 때
-		if (!email.match(regEx)) {
-			errors.email = 'Email must be a valid email address';
-		}
-	}
-	// password 비였을 때
-	if (password === '') {
-		errors.password = 'Password must not empty';
-		// password 와 confirmPassword 다를 때
-	} else if (password !== confirmPassword) {
-		errors.confirmPassword = 'Passwords must match';
-	}
+  const errors = {};
+  // username 비였을 때
+  if (username.trim() === '') {
+    errors.username = 'Username must not be empty';
+  }
+  // email 비였을 때
+  if (email.trim() === '') {
+    errors.email = 'Email must not be empty';
+  } else {
+    // email 형식
+    const regEx = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
+    // email이 형식에 맞지 않을 때
+    if (!email.match(regEx)) {
+      errors.email = 'Email must be a valid email address';
+    }
+  }
+  // password 비였을 때
+  if (password === '') {
+    errors.password = 'Password must not empty';
+    // password 와 confirmPassword 다를 때
+  } else if (password !== confirmPassword) {
+    errors.confirmPassword = 'Passwords must match';
+  }
 
-	return {
-		errors,
-		valid: Object.keys(errors).length < 1,
-	};
+  return {
+    errors,
+    valid: Object.keys(errors).length < 1,
+  };
 };
 
 export { validateRegisterInput };
@@ -289,15 +289,15 @@ yarn add jsonwebtoken
 
 ```ts
 const generateToken = (user) => {
-	return jwt.sign(
-		{
-			id: user.id,
-			email: user.email,
-			username: user.username,
-		},
-		SECRET_KEY,
-		{ expiresIn: '1h' }
-	);
+  return jwt.sign(
+    {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+    },
+    SECRET_KEY,
+    { expiresIn: '1h' }
+  );
 };
 
 // Create login token
@@ -327,13 +327,13 @@ Bearer 인증 방식은 클라이언트에서 서버로 요청을 보낼 때 마
 import { AuthenticationError, ForbiddenError } from 'apollo-server';
 
 const auth = ({ req }) => {
-	if (!req.headers.authorization)
-		throw new AuthenticationError('missing token');
+  if (!req.headers.authorization)
+    throw new AuthenticationError('missing token');
 
-	const token = req.headers.authorization.substr(7);
-	const user = users.find((user) => user.token === token);
-	if (!user) throw new AuthenticationError('invalid token');
-	return { user };
+  const token = req.headers.authorization.substr(7);
+  const user = users.find((user) => user.token === token);
+  if (!user) throw new AuthenticationError('invalid token');
+  return { user };
 };
 
 const context = { db, auth };
@@ -353,9 +353,9 @@ context 레벨 인증이 보안적으로 매우 강력하기는 하지만 실제
 
 ```ts
 const server = new ApolloServer({
-	typeDefs,
-	resolvers,
-	context: ({ req }) => ({ req, pubsub, db }),
+  typeDefs,
+  resolvers,
+  context: ({ req }) => ({ req, pubsub, db }),
 });
 ```
 
@@ -385,22 +385,22 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export default (context) => {
-	// context = { ... headers }
-	const authHeader = context.req.headers.authorization;
-	if (authHeader) {
-		// Bearer ....
-		const token = authHeader.split('Bearer ')[1];
-		if (token) {
-			try {
-				const user = jwt.verify(token, process.env.SECRET_KEY);
-				return user;
-			} catch (err) {
-				throw new AuthenticationError('Invalid/Expired token');
-			}
-		}
-		throw new Error("Authentication token must be 'Bearer [token]");
-	}
-	throw new Error('Authorization header must be provided');
+  // context = { ... headers }
+  const authHeader = context.req.headers.authorization;
+  if (authHeader) {
+    // Bearer ....
+    const token = authHeader.split('Bearer ')[1];
+    if (token) {
+      try {
+        const user = jwt.verify(token, process.env.SECRET_KEY);
+        return user;
+      } catch (err) {
+        throw new AuthenticationError('Invalid/Expired token');
+      }
+    }
+    throw new Error("Authentication token must be 'Bearer [token]");
+  }
+  throw new Error('Authorization header must be provided');
 };
 ```
 
@@ -411,6 +411,146 @@ export default (context) => {
 > 인증(Authentication)
 
 ![](../portfolio-server/img/login.png)
+
+## [GitHub Oauth](https://moonhighway.com/github-authorization)
+
+- Settings > Developer settings > Oauth Apps
+
+```sh
+Hompage URL : http://localhost:3000
+Authorization callback URL : http://localhost:3000/auth/github/callback
+```
+
+### github api client id / secret key
+
+```ts
+GITHUB_CLIENT_ID = [github api client id]
+GITHUB_CLIENT_SECRET = [github api client secret key]
+```
+
+### Step One: Create the githubLoginUrl Query
+
+```ts
+// graphql/schema.js
+type Query {
+  githubLoginUrl: String!
+}
+
+// graphql/resolvers.js
+Query: {
+  githubLoginUrl: () =>
+    `https://github.com/login/oauth/authorize?client_id=${
+      process.env.GITHUB_CLIENT_ID
+    }&scope=user`;
+}
+```
+
+- return
+
+```ts
+return :
+{
+  "data": {
+    "githubLoginUrl": "https://github.com/login/oauth/authorize?client_id=bd4c1ed4e99a830ddc95&scope=user"
+  }
+}
+```
+
+- 해당 url로 접근해서 login 하면 callback을 받는다
+
+```sh
+> http://localhost:3000/auth/github/callback?code=<YOUR-UNIQUE-CODE>
+
+```
+
+### Step Two: Build the authorizeWithGithub Mutation
+
+```ts
+// graphql/resolvers.js
+
+type AuthPayload {
+  githubToken: String!
+  user: User!
+}
+
+type Mutation {
+  authorizeWithGithub(code: String!): AuthPayload!
+}
+```
+
+- we`ll need to build two function to handle github api request
+
+```ts
+// util/check-auth.js
+const requestGithubToken = (credentials) => {
+  fetch('https://github.com/login/oauth/access_token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(credentials),
+  })
+    .then((res) => res.json())
+    .catch((error) => {
+      throw new Error(JSON.stringify(error));
+    });
+};
+
+const requestGithubUserAccount = (token) => {
+  fetch(`https://api.github.com/user?access_token=${token}`).then(
+    (res) => res.json
+  );
+};
+
+const requestGithubUser = async (credentials) => {
+  const { access_token } = await requestGithubToken(credentials);
+  const githubUser = await requestGithubUserAccount(access_token);
+  return { ...githubUser, access_token };
+};
+```
+
+- Now, let's actually write the resolver to obtain a token and a user account from GitHub.
+
+```ts
+// graphql/resolvers.js
+ async authorizeWithGithub(parent, { code }) {
+      let githubUser = await requestGithubUser({
+        client_id: process.env.GITHUB_CLIENT_ID,
+        client_secret: process.env.GITHUB_CLIENT_SECRET,
+        code,
+      });
+      currentUser = {
+        username: githubUser.name,
+        githubLogin: githubUser.login,
+        githubToken: githubUser.access_token,
+        avatar: githubUser.avatar_url,
+      };
+
+      return { user: currentUser, token: access_token };
+    },
+```
+
+## Google Oauth
+
+[`Google Cloud Platform`](https://console.cloud.google.com/)
+
+- API 및 서비스 > API 및 서비스 사용 설정 > GOOGLE+ API
+- GOOGLE+ API > 사용자 인증 정보 > 사용자 인증 정보 만들기
+- Oauth 동의 화면
+- 사용자 인증 정보 만들기 > Oauth 클라이언트 ID
+
+```sh
+유형 : web application
+승인된 리디렉션 URI : http://localhost:3000/auth/google/callback
+```
+
+### google api client id / secret key
+
+```ts
+GOOGLE_CLIENT_ID = [google cloud api client id]
+GOOGLE_CLIENT_SECRET = [google cloud api client secret key]
+```
 
 ## reference
 
@@ -434,6 +574,8 @@ npx apollo service:push --graph=Juminhark-7612 --key=user:gh.Juminhark:bQVB2ZAQw
 
 ```ts
 // .env
-DB_URL=[mongoDB Cluster Connection string]
-SECRET_KEY=[token verify key]
+DB_URL = [mongoDB Cluster Connection string]
+SECRET_KEY = [token verify key]
+GOOGLE_CLIENT_ID = [google cloud api client id]
+GOOGLE_CLIENT_SECRET = [google cloud api client secret key]
 ```
