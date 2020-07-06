@@ -9,12 +9,14 @@
 	"author": "Juminhark <40381241+Juminhark@users.noreply.github.com>",
 	"license": "MIT",
 	"dependencies": {
+		"apollo-fetch": "^0.7.0",
 		"apollo-server": "^2.14.0",
 		"bcryptjs": "^2.4.3",
 		"dotenv": "^8.2.0",
 		"graphql": "^15.0.0",
 		"jsonwebtoken": "^8.5.1",
-		"mongoose": "^5.9.16"
+		"mongoose": "^5.9.16",
+		"passport-google-oauth20": "^2.0.0"
 	},
 	"devDependencies": {
 		"@babel/cli": "^7.10.0",

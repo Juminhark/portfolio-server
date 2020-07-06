@@ -51,3 +51,7 @@ const typeDefs = gql`
 `;
 
 export default typeDefs;
+
+// user: User!
+
+// authorizeWithGoogle(code: String): AuthPayload

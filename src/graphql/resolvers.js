@@ -6,10 +6,12 @@ import User from '../db/models/user.model';
 import Project from '../db/models/project.model';
 // util
 import { validateRegisterInput, validateLoginInput } from '../util/validators';
-import { checkAuth, requestGithubUser } from '../util/check-auth';
+import { checkAuth } from '../util/check-auth';
 // dotenv
 import dotenv from 'dotenv';
 dotenv.config();
+// fetch
+import { createApolloFetch } from 'apollo-fetch';
 
 // TODO: login or Register. create Token. server-resolvers 단계에서 인증관리
 const generateToken = (user) => {
@@ -22,6 +24,41 @@ const generateToken = (user) => {
     process.env.SECRET_KEY,
     { expiresIn: '1h' }
   );
+};
+
+const requestGithubToken = (code) => {
+  const uri = 'https://github.com/login/oauth/access_token';
+  const apolloFetch = createApolloFetch({ uri });
+  console.log('reqest token');
+
+  apolloFetch({
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({
+      client_id: process.env.GITHUB_CLIENT_ID,
+      client_secret: process.env.GITHUB_CLIENT_SECRET,
+      code,
+    }),
+  })
+    .then((res) => {
+      res.json();
+      console.log('fetch token');
+    })
+    .catch((error) => {
+      throw new Error(JSON.stringify(error));
+    });
+
+  return 'token success';
+};
+
+const requestGithubUserAccount = (token) => {
+  const uri = `https://api.github.com/user?access_token=${token}`;
+  const apolloFetch = createApolloFetch({ uri });
+
+  return apolloFetch().then((res) => res.json());
 };
 
 const resolvers = {
@@ -137,27 +174,23 @@ const resolvers = {
       };
     },
 
-    async authorizeWithGithub(_, { code }) {
+    authorizeWithGithub: async (_, { code }) => {
       console.log(code);
-      let githubUser = await requestGithubUser({
-        client_id: process.env.GITHUB_CLIENT_ID,
-        client_secret: process.env.GITHUB_CLIENT_SECRET,
-        code,
-      });
+      const { access_token } = await requestGithubToken(code);
 
-      console.log(githubUser);
+      const githubUser = await requestGithubUserAccount(access_token);
 
-      let currentUser = {
+      const currentUser = {
         username: githubUser.name,
         githubLogin: githubUser.login,
-        githubToken: githubUser.access_token,
+        token: githubUser.access_token,
         avatar: githubUser.avatar_url,
       };
 
-      return { user: currentUser, token: access_token };
+      return { user: currentUser, githubToken: currentUser.token };
     },
 
-    async createProject(_, { title, content }, context) {
+    createProject: async (_, { title, content }, context) => {
       const user = checkAuth(context);
 
       if (title.trim() === '') {
@@ -184,7 +217,7 @@ const resolvers = {
       return project;
     },
 
-    async deleteProject(_, { projectId }, context) {
+    deleteProject: async (_, { projectId }, context) => {
       const user = checkAuth(context);
 
       try {
@@ -208,3 +241,13 @@ const resolvers = {
 };
 
 export default resolvers;
+
+// authorizeWithGoogle: (_, { code }) => {
+//   console.log(process.env.GOOGLE_CLIENT_ID);
+//   console.log(process.env.GOOGLE_CLIENT_SECRET);
+
+//   return {
+//     user: { githubLogin: 'currentUser' },
+//     githubToken: 'access_token',
+//   };
+// },

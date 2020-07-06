@@ -552,6 +552,14 @@ GOOGLE_CLIENT_ID = [google cloud api client id]
 GOOGLE_CLIENT_SECRET = [google cloud api client secret key]
 ```
 
+### passport-google-oauth20
+
+- install dependencies
+
+```sh
+> yarn add passport-google-oauth20
+```
+
 ## reference
 
 - [`heroku - dotenv`](https://velog.io/@suseodd/Heroku%EC%97%90-.env%ED%8C%8C%EC%9D%BC-%EC%A0%81%EC%9A%A9-20k621f03d)
