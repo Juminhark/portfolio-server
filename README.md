@@ -412,7 +412,14 @@ export default (context) => {
 
 ![](../portfolio-server/img/login.png)
 
-## [GitHub Oauth](https://moonhighway.com/github-authorization)
+## [GitHub Oauth](https://docs.github.com/en/developers/apps/authorizing-oauth-apps)
+
+### reference
+
+- [github doc - authorizing-oauth-apps](https://docs.github.com/en/developers/apps/authorizing-oauth-apps)
+- [moonhighway - GitHub Authorization with GraphQL and Apollo Server](https://moonhighway.com/github-authorization)
+
+### start
 
 - Settings > Developer settings > Oauth Apps
 
@@ -478,6 +485,12 @@ type Mutation {
 }
 ```
 
+### [cross-fetch](https://www.npmjs.com/package/cross-fetch)
+
+```sh
+> yarn add cross-fetch
+```
+
 - we`ll need to build two function to handle github api request
 
 ```ts
@@ -531,9 +544,11 @@ const requestGithubUser = async (credentials) => {
     },
 ```
 
-## Google Oauth
+## [Google-OAuth 2.0 for Server-Side Web Apps](https://developers.google.com/identity/protocols/oauth2/web-server)
 
-[`Google Cloud Platform`](https://console.cloud.google.com/)
+### Step 1 : credentials from the Google API Console
+
+#### [`Google Cloud Platform`](https://console.cloud.google.com/)
 
 - API 및 서비스 > API 및 서비스 사용 설정 > GOOGLE+ API
 - GOOGLE+ API > 사용자 인증 정보 > 사용자 인증 정보 만들기
@@ -542,23 +557,47 @@ const requestGithubUser = async (credentials) => {
 
 ```sh
 유형 : web application
-승인된 리디렉션 URI : http://localhost:3000/auth/google/callback
+승인된 자바스크립트 출처 : http://localhost:4000
+승인된 리디렉션 URI : https://developers.google.com/oauthplayground
 ```
 
-### google api client id / secret key
+- http://localhost:4000 server side playglound에서 확인용 요청을 보낸다.
+- https://developers.google.com/oauthplayground 는 google에서 제공하는 개발자용 oauth playground
+
+#### google api client id / secret key
 
 ```ts
+// config.js
 GOOGLE_CLIENT_ID = [google cloud api client id]
 GOOGLE_CLIENT_SECRET = [google cloud api client secret key]
 ```
 
-### passport-google-oauth20
+### Step 2 : access tokens
 
-- install dependencies
+1. Server response Query
 
-```sh
-> yarn add passport-google-oauth20
+```ts
+Qurey : {
+  googleLoginUrl: () =>
+      `https://accounts.google.com/o/oauth2/v2/auth?scope=https://www.googleapis.com/auth/drive.metadata.readonly&access_type=offline&include_granted_scopes=true&state=state_parameter_passthrough_value&redirect_uri=https://developers.google.com/oauthplayground&response_type=code&client_id=${process.env.GOOGLE_CLIENT_ID}`,
+}
 ```
+
+- https://accounts.google.com/o/oauth2/v2/auth?
+- scope=https://www.googleapis.com/auth/drive.metadata.readonly
+- access_type=offline
+- include_granted_scopes=true
+- state=state_parameter_passthrough_value
+- redirect_uri=https://developers.google.com/oauthplayground
+- response_type=code
+- client_id=\${process.env.GOOGLE_CLIENT_ID}
+
+### [OAuth 2.0 Playground](https://developers.google.com/oauthplayground)
+
+- **redirect url을 server로 바로 보내면 좋겠지만 http 로 된 주소에서는 google이 확인 되지않은 앱으로 차단한다.**
+
+- Step 1 : Select & authorize APIS(Select the scope) => https://www.googleapis.com/auth/drive.metadatareadonly
+- Step 2 : Exhange authorization code for tokens => 위의 과정 후 로그인을 하면 Authorization code 를 받아오고 token이 생성된다.
 
 ## reference
 

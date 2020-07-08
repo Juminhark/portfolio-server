@@ -6,8 +6,8 @@ const typeDefs = gql`
     email: String!
     username: String!
     token: String!
-    avatar: String
-    githubLogin: String
+    github_avatar: String
+    github_url: String
   }
 
   type Project {
@@ -25,22 +25,19 @@ const typeDefs = gql`
     confirmPassword: String!
   }
 
-  type AuthPayload {
-    githubToken: String!
-    user: User!
-  }
-
   type Query {
     allUser: [User]
     getProjects: [Project]
     getProject(projectId: ID!): Project
     githubLoginUrl: String!
+    googleLoginUrl: String!
   }
 
   type Mutation {
     register(registerInput: RegisterInput): User!
     login(email: String!, password: String!): User!
-    authorizeWithGithub(code: String!): AuthPayload!
+    authorizeWithGithub(code: String!): User!
+    authorizeWithGoogle(code: String!): User!
     createProject(title: String!, content: String): Project!
     deleteProject(projectId: ID!): String
   }

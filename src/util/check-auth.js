@@ -1,7 +1,7 @@
 import { AuthenticationError } from 'apollo-server';
-
+// jwt
 import jwt from 'jsonwebtoken';
-
+// config
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -24,4 +24,6 @@ const checkAuth = (context) => {
   throw new Error('Authorization header must be provided');
 };
 
-export default { checkAuth };
+export default {
+  checkAuth,
+};

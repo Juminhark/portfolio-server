@@ -11,7 +11,7 @@ import { checkAuth } from '../util/check-auth';
 import dotenv from 'dotenv';
 dotenv.config();
 // fetch
-import { createApolloFetch } from 'apollo-fetch';
+import { fetch } from 'cross-fetch';
 
 // TODO: login or Register. create Token. server-resolvers 단계에서 인증관리
 const generateToken = (user) => {
@@ -24,41 +24,6 @@ const generateToken = (user) => {
     process.env.SECRET_KEY,
     { expiresIn: '1h' }
   );
-};
-
-const requestGithubToken = (code) => {
-  const uri = 'https://github.com/login/oauth/access_token';
-  const apolloFetch = createApolloFetch({ uri });
-  console.log('reqest token');
-
-  apolloFetch({
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
-    body: JSON.stringify({
-      client_id: process.env.GITHUB_CLIENT_ID,
-      client_secret: process.env.GITHUB_CLIENT_SECRET,
-      code,
-    }),
-  })
-    .then((res) => {
-      res.json();
-      console.log('fetch token');
-    })
-    .catch((error) => {
-      throw new Error(JSON.stringify(error));
-    });
-
-  return 'token success';
-};
-
-const requestGithubUserAccount = (token) => {
-  const uri = `https://api.github.com/user?access_token=${token}`;
-  const apolloFetch = createApolloFetch({ uri });
-
-  return apolloFetch().then((res) => res.json());
 };
 
 const resolvers = {
@@ -94,7 +59,10 @@ const resolvers = {
     },
 
     githubLoginUrl: () =>
-      `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=user`,
+      `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=user&redirect_uri=http%3A//localhost:4000/`,
+
+    googleLoginUrl: () =>
+      `https://accounts.google.com/o/oauth2/v2/auth?scope=https://www.googleapis.com/auth/drive.metadata.readonly&access_type=offline&include_granted_scopes=true&state=state_parameter_passthrough_value&redirect_uri=https://developers.google.com/oauthplayground&response_type=code&client_id=${process.env.GOOGLE_CLIENT_ID}`,
   },
   Mutation: {
     register: async (
@@ -175,19 +143,72 @@ const resolvers = {
     },
 
     authorizeWithGithub: async (_, { code }) => {
-      console.log(code);
-      const { access_token } = await requestGithubToken(code);
+      const tokenRes = await fetch(
+        'https://github.com/login/oauth/access_token',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
+            client_id: process.env.GITHUB_CLIENT_ID,
+            client_secret: process.env.GITHUB_CLIENT_SECRET,
+            code,
+          }),
+        }
+      );
 
-      const githubUser = await requestGithubUserAccount(access_token);
+      const tokenData = await tokenRes.json();
+
+      const userRes = await fetch(
+        `https://api.github.com/user?access_token=${tokenData.access_token}`
+      );
+
+      const userData = await userRes.json();
 
       const currentUser = {
-        username: githubUser.name,
-        githubLogin: githubUser.login,
-        token: githubUser.access_token,
-        avatar: githubUser.avatar_url,
+        username: userData.name,
+        email: userData.email,
+        github_avatar: userData.avatar_url,
+        github_url: userData.html_url,
+        token: tokenData.access_token,
       };
 
-      return { user: currentUser, githubToken: currentUser.token };
+      // todo: Oauth로 접속한 user가 회원가입하지 않은 사람이라면?
+      // todo: 자동으로 회원가입을 하고
+      // todo: 이미 가입한 회원이라면 회원 정보를 가져다 준다.
+
+      const user = await User.findOne({ email: currentUser.email });
+
+      if (user) {
+        return { ...user._doc, id: user_id, token: currentUser.token };
+      } else {
+        const newUser = new User({
+          email: currentUser.username,
+          username,
+        });
+
+        // TODO: Save the user
+        const res = await newUser.save();
+
+        // TODO: 새로운 user의 정보반환. res(email, password, username), id, token
+        return {
+          ...res._doc,
+          id: res._id,
+          token: currentUser.token,
+        };
+      }
+    },
+
+    authorizeWithGoogle: (_, { code }) => {
+      console.log(process.env.GOOGLE_CLIENT_ID);
+      console.log(process.env.GOOGLE_CLIENT_SECRET);
+
+      return {
+        user: { githubLogin: 'currentUser' },
+        githubToken: 'access_token',
+      };
     },
 
     createProject: async (_, { title, content }, context) => {
@@ -241,13 +262,3 @@ const resolvers = {
 };
 
 export default resolvers;
-
-// authorizeWithGoogle: (_, { code }) => {
-//   console.log(process.env.GOOGLE_CLIENT_ID);
-//   console.log(process.env.GOOGLE_CLIENT_SECRET);
-
-//   return {
-//     user: { githubLogin: 'currentUser' },
-//     githubToken: 'access_token',
-//   };
-// },
