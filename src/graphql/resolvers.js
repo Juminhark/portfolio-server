@@ -143,14 +143,20 @@ const resolvers = {
       const user = await User.findOne({ email });
 
       if (!user) {
-        errors.general = 'User not found';
-        throw new UserInputError('User not found', { errors });
+        throw new UserInputError('User not found', {
+          errors: {
+            email: 'User not found',
+          },
+        });
       }
 
       const match = await bcrypt.compare(password, user.password);
       if (!match) {
-        errors.general = 'Wrong credentials';
-        throw new UserInputError('Wrong credentials', { errors });
+        throw new UserInputError('Wrong credentials', {
+          errors: {
+            password: 'Wrong credentials',
+          },
+        });
       }
 
       const token = generateToken(user);
