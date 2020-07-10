@@ -12,6 +12,8 @@ import dotenv from 'dotenv';
 dotenv.config();
 // fetch
 import { fetch } from 'cross-fetch';
+// google oauth
+import { google } from 'googleapis';
 
 // TODO: login or Register. create Token. server-resolvers 단계에서 인증관리
 const generateToken = (user) => {
@@ -25,6 +27,13 @@ const generateToken = (user) => {
     { expiresIn: '1h' }
   );
 };
+
+// google oauth
+const oauth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  'http://localhost:4000'
+);
 
 const resolvers = {
   Query: {
@@ -61,8 +70,19 @@ const resolvers = {
     githubLoginUrl: () =>
       `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=user&redirect_uri=http%3A//localhost:4000/`,
 
-    googleLoginUrl: () =>
-      `https://accounts.google.com/o/oauth2/v2/auth?scope=https://www.googleapis.com/auth/drive.metadata.readonly&access_type=offline&include_granted_scopes=true&state=state_parameter_passthrough_value&redirect_uri=https://developers.google.com/oauthplayground&response_type=code&client_id=${process.env.GOOGLE_CLIENT_ID}`,
+    googleLoginUrl: () => {
+      const scopes = [
+        'https://www.googleapis.com/auth/userinfo.profile',
+        'https://www.googleapis.com/auth/userinfo.email',
+      ];
+
+      const url = oauth2Client.generateAuthUrl({
+        access_type: 'offline',
+        scope: scopes,
+      });
+
+      return url;
+    },
   },
   Mutation: {
     register: async (
@@ -185,8 +205,8 @@ const resolvers = {
         return { ...user._doc, id: user_id, token: currentUser.token };
       } else {
         const newUser = new User({
-          email: currentUser.username,
-          username,
+          email: currentUser.email,
+          username: currentUser.username,
         });
 
         // TODO: Save the user
@@ -201,14 +221,54 @@ const resolvers = {
       }
     },
 
-    authorizeWithGoogle: (_, { code }) => {
-      console.log(process.env.GOOGLE_CLIENT_ID);
-      console.log(process.env.GOOGLE_CLIENT_SECRET);
+    authorizeWithGoogle: async (_, { code }) => {
+      // todo : access_token, refresh_token, scope, token_type, expiry_date
+      const { tokens } = await oauth2Client.getToken(decodeURIComponent(code));
 
-      return {
-        user: { githubLogin: 'currentUser' },
-        githubToken: 'access_token',
+      // todo : user 정보 가져오기
+      const userRes = await fetch(
+        `https://www.googleapis.com/oauth2/v2/userinfo?alt=json&access_token=${tokens.access_token}`
+      );
+
+      const userData = await userRes.json();
+
+      console.log(userData);
+
+      const currentUser = {
+        username: userData.name,
+        email: userData.email,
+        google_avatar: userData.picture,
+        token: tokens.access_token,
       };
+
+      console.log(currentUser.username);
+
+      // todo: Oauth로 접속한 user가 회원가입하지 않은 사람이라면?
+      // todo: 자동으로 회원가입을 하고
+      // todo: 이미 가입한 회원이라면 회원 정보를 가져다 준다.
+
+      const user = await User.findOne({ email: currentUser.email });
+
+      if (user) {
+        console.log('user exist');
+        return { ...user._doc, id: user_id, token: currentUser.token };
+      } else {
+        console.log('Create New User');
+        const newUser = new User({
+          email: currentUser.email,
+          username: currentUser.username,
+        });
+
+        // TODO: Save the user
+        const res = await newUser.save();
+
+        // TODO: 새로운 user의 정보반환. res(email, password, username), id, token
+        return {
+          ...res._doc,
+          id: res._id,
+          token: currentUser.token,
+        };
+      }
     },
 
     createProject: async (_, { title, content }, context) => {

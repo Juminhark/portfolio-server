@@ -558,11 +558,8 @@ const requestGithubUser = async (credentials) => {
 ```sh
 유형 : web application
 승인된 자바스크립트 출처 : http://localhost:4000
-승인된 리디렉션 URI : https://developers.google.com/oauthplayground
+승인된 리디렉션 URI : http://localhost:4000
 ```
-
-- http://localhost:4000 server side playglound에서 확인용 요청을 보낸다.
-- https://developers.google.com/oauthplayground 는 google에서 제공하는 개발자용 oauth playground
 
 #### google api client id / secret key
 
@@ -574,30 +571,86 @@ GOOGLE_CLIENT_SECRET = [google cloud api client secret key]
 
 ### Step 2 : access tokens
 
-1. Server response Query
+1. create login url
 
 ```ts
-Qurey : {
-  googleLoginUrl: () =>
-      `https://accounts.google.com/o/oauth2/v2/auth?scope=https://www.googleapis.com/auth/drive.metadata.readonly&access_type=offline&include_granted_scopes=true&state=state_parameter_passthrough_value&redirect_uri=https://developers.google.com/oauthplayground&response_type=code&client_id=${process.env.GOOGLE_CLIENT_ID}`,
+import { google } from 'googleapis';
+
+Qurey: {
+  googleLoginUrl: () => {
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      'http://localhost:4000'
+    );
+
+    const scopes = [
+      'https://www.googleapis.com/auth/userinfo.profile',
+      'https://www.googleapis.com/auth/userinfo.email',
+    ];
+
+    const url = oauth2Client.generateAuthUrl({
+      access_type: 'offline',
+      scope: scopes,
+    });
+    return url;
+  };
 }
 ```
 
-- https://accounts.google.com/o/oauth2/v2/auth?
-- scope=https://www.googleapis.com/auth/drive.metadata.readonly
-- access_type=offline
-- include_granted_scopes=true
-- state=state_parameter_passthrough_value
-- redirect_uri=https://developers.google.com/oauthplayground
-- response_type=code
-- client_id=\${process.env.GOOGLE_CLIENT_ID}
+2. Token 받고 user info 가져오기
 
-### [OAuth 2.0 Playground](https://developers.google.com/oauthplayground)
+```ts
+resolver: {
+  authorizeWithGoogle: async (_, { code }) => {
 
-- **redirect url을 server로 바로 보내면 좋겠지만 http 로 된 주소에서는 google이 확인 되지않은 앱으로 차단한다.**
+// todo : access_token, refresh_token, scope, token_type, expiry_date
+    const { tokens } = await oauth2Client.getToken(decodeURIComponent(code));
 
-- Step 1 : Select & authorize APIS(Select the scope) => https://www.googleapis.com/auth/drive.metadatareadonly
-- Step 2 : Exhange authorization code for tokens => 위의 과정 후 로그인을 하면 Authorization code 를 받아오고 token이 생성된다.
+    // todo : user 정보 가져오기
+    const userRes = await fetch(
+      `https://www.googleapis.com/oauth2/v2/userinfo?alt=json&access_token=${tokens.access_token}`
+    );
+
+    const userData = await userRes.json();
+}
+
+```
+
+### [googleapis](https://github.com/googleapis/google-api-nodejs-client#oauth2-client)
+
+### error fix : invalid_grant : Malformed auth code.
+
+- [stackoverflow](https://stackoverflow.com/questions/49311417getting-invalid-grant-malformed-auth-code-while-verifying-token-on-server-side)
+
+```ts
+authorizeWithGoogle: async (_, { code }) => {
+  console.log(code);
+  const { tokens } = await oauth2Client.getToken(code);
+};
+```
+
+```sh
+> 4%2F1wHpV5wTfC05FTz9uM_TYzcB0Ma8R7sjKJo8CW2PlosnHO7p0tQLsFB-D8gIE3DMqnyetyVhiOO_w6qejspjhPA
+
+> error!
+
+```
+
+- code 을 decode 해주어야 한다.
+
+```ts
+authorizeWithGoogle: async (_, { code }) => {
+  const { tokens } = await oauth2Client.getToken(decodeURIComponent(code));
+};
+```
+
+#### getToken response 에서 refresh_token을 받을수 없을 경우.
+
+- 1.  https://myaccount.google.com/u/0/permissions.
+- 2.  Under the Third-party apps menu, choose your app.
+- 3.  Click Remove access and then click Ok to confirm
+- 4.  The next OAuth2 request you make will return a refresh_token (providing that it also includes the 'access_type=offline' query parameter.
 
 ## reference
 
