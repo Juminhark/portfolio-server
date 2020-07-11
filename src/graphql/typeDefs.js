@@ -29,8 +29,7 @@ const typeDefs = gql`
     allUser: [User]
     getProjects: [Project]
     getProject(projectId: ID!): Project
-    githubLoginUrl: String!
-    googleLoginUrl: String!
+    oauthLoginUrl: [String]
   }
 
   type Mutation {

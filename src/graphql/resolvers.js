@@ -32,7 +32,7 @@ const generateToken = (user) => {
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  'http://localhost:4000'
+  'http://localhost:3000/google/callback'
 );
 
 const resolvers = {
@@ -67,21 +67,20 @@ const resolvers = {
       }
     },
 
-    githubLoginUrl: () =>
-      `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=user&redirect_uri=http%3A//localhost:4000/`,
-
-    googleLoginUrl: () => {
+    oauthLoginUrl: () => {
       const scopes = [
         'https://www.googleapis.com/auth/userinfo.profile',
         'https://www.googleapis.com/auth/userinfo.email',
       ];
 
-      const url = oauth2Client.generateAuthUrl({
+      const googleUrl = oauth2Client.generateAuthUrl({
         access_type: 'offline',
         scope: scopes,
       });
 
-      return url;
+      const githubUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=user&redirect_uri=http%3A//localhost:3000/github/callback`;
+
+      return [googleUrl, githubUrl];
     },
   },
   Mutation: {
