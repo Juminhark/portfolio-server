@@ -9,7 +9,7 @@
 	"author": "Juminhark <40381241+Juminhark@users.noreply.github.com>",
 	"license": "MIT",
 	"dependencies": {
-		"apollo-server": "^2.14.0",
+		"apollo-server": "^2.14.2",
 		"bcryptjs": "^2.4.3",
 		"cross-fetch": "^3.0.5",
 		"dotenv": "^8.2.0",
