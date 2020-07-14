@@ -159,6 +159,8 @@ const resolvers = {
 			}
 
 			const token = generateToken(user);
+			console.log('token');
+			console.log(token);
 
 			return {
 				...user._doc,
@@ -255,6 +257,8 @@ const resolvers = {
 
 			const user = await User.findOne({ email: currentUser.email });
 			const token = generateToken(user);
+			console.log('token');
+			console.log(token);
 			console.log('user');
 			console.log(user);
 
