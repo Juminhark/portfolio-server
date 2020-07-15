@@ -159,8 +159,6 @@ const resolvers = {
 			}
 
 			const token = generateToken(user);
-			console.log('token');
-			console.log(token);
 
 			return {
 				...user._doc,
@@ -194,12 +192,13 @@ const resolvers = {
 
 			const userData = await userRes.json();
 
+			console.log(userData);
+
 			const currentUser = {
 				username: userData.name,
 				email: userData.email,
 				picture: userData.avatar_url,
 				github_url: userData.html_url,
-				token: tokenData.access_token,
 			};
 
 			// todo: Oauth로 접속한 user가 회원가입하지 않은 사람이라면?
@@ -209,21 +208,31 @@ const resolvers = {
 			const user = await User.findOne({ email: currentUser.email });
 
 			if (user) {
-				return { ...user._doc, id: user._id, token: currentUser.token };
+				const token = generateToken(user);
+				console.log(user._doc);
+				return {
+					...user._doc,
+					id: user._id,
+					picture: currentUser.picture,
+					token,
+				};
 			} else {
 				const newUser = new User({
 					email: currentUser.email,
 					username: currentUser.username,
+					picture: currentUser.picture,
 				});
 
 				// TODO: Save the user
 				const res = await newUser.save();
 
+				const token = generateToken(res);
+
 				// TODO: 새로운 user의 정보반환. res(email, password, username), id, token
 				return {
 					...res._doc,
 					id: res._id,
-					token: currentUser.token,
+					token,
 				};
 			}
 		},
@@ -232,6 +241,8 @@ const resolvers = {
 			// todo : access_token, refresh_token, scope, token_type, expiry_date
 			const { tokens } = await oauth2Client.getToken(decodeURIComponent(code));
 
+			// oauth2Client.setCredentials(tokens);
+
 			// todo : user 정보 가져오기
 			const userRes = await fetch(
 				`https://www.googleapis.com/oauth2/v2/userinfo?alt=json&access_token=${tokens.access_token}`
@@ -239,41 +250,37 @@ const resolvers = {
 
 			const userData = await userRes.json();
 
-			console.log('userData');
-			console.log(userData);
-
 			const currentUser = {
 				username: userData.name,
 				email: userData.email,
 				picture: userData.picture,
 			};
 
-			console.log('currentUser');
-			console.log(currentUser);
-
 			// todo: Oauth로 접속한 user가 회원가입하지 않은 사람이라면?
 			// todo: 자동으로 회원가입을 하고
 			// todo: 이미 가입한 회원이라면 회원 정보를 가져다 준다.
 
 			const user = await User.findOne({ email: currentUser.email });
-			const token = generateToken(user);
-			console.log('token');
-			console.log(token);
-			console.log('user');
-			console.log(user);
 
 			if (user) {
-				console.log('user exist');
-				return { ...user._doc, id: user._id, token };
+				const token = generateToken(user);
+				console.log(user._doc);
+				return {
+					...user._doc,
+					id: user._id,
+					picture: currentUser.picture,
+					token,
+				};
 			} else {
-				console.log('Create New User');
 				const newUser = new User({
 					email: currentUser.email,
 					username: currentUser.username,
+					picture: currentUser.picture,
 				});
 
 				// TODO: Save the user
 				const res = await newUser.save();
+				const token = generateToken(res);
 
 				// TODO: 새로운 user의 정보반환. res(email, password, username), id, token
 				return {
