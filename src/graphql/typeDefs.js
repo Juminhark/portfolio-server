@@ -6,7 +6,7 @@ const typeDefs = gql`
 		email: String!
 		username: String!
 		token: String!
-		picture: String
+		pictureURL: String
 		github_url: String
 	}
 
@@ -15,7 +15,7 @@ const typeDefs = gql`
 		title: String!
 		content: String!
 		updated: String!
-		username: String!
+		owner: User!
 	}
 
 	input RegisterInput {

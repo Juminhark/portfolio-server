@@ -197,7 +197,7 @@ const resolvers = {
 			const currentUser = {
 				username: userData.name,
 				email: userData.email,
-				picture: userData.avatar_url,
+				picture_url: userData.avatar_url,
 				github_url: userData.html_url,
 			};
 
@@ -253,7 +253,7 @@ const resolvers = {
 			const currentUser = {
 				username: userData.name,
 				email: userData.email,
-				picture: userData.picture,
+				picture_url: userData.picture,
 			};
 
 			// todo: Oauth로 접속한 user가 회원가입하지 않은 사람이라면?
@@ -268,14 +268,14 @@ const resolvers = {
 				return {
 					...user._doc,
 					id: user._id,
-					picture: currentUser.picture,
+					picture_url: currentUser.picture_url,
 					token,
 				};
 			} else {
 				const newUser = new User({
 					email: currentUser.email,
 					username: currentUser.username,
-					picture: currentUser.picture,
+					picture_url: currentUser.picture_url,
 				});
 
 				// TODO: Save the user
@@ -294,6 +294,8 @@ const resolvers = {
 		createProject: async (_, { title, content }, context) => {
 			const user = checkAuth(context);
 
+			console.log(user);
+
 			if (title.trim() === '') {
 				throw new Error('Project title must not be empty');
 			}
@@ -304,8 +306,7 @@ const resolvers = {
 			const newProject = new Project({
 				title,
 				content,
-				user: user.id,
-				username: user.username,
+				owner: user,
 				updated: new Date().toISOString(),
 			});
 
@@ -323,7 +324,7 @@ const resolvers = {
 
 			try {
 				const project = await Project.findById(projectId);
-				if (user.username === project.username) {
+				if (project.owner === user) {
 					await project.delete();
 					return 'Project deleted successfully';
 				} else {
