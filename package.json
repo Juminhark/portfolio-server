@@ -16,7 +16,7 @@
 		"googleapis": "^52.1.0",
 		"graphql": "^15.0.0",
 		"jsonwebtoken": "^8.5.1",
-		"mongoose": "^5.9.16"
+		"mongoose": "^5.9.25"
 	},
 	"devDependencies": {
 		"@babel/cli": "^7.10.0",
