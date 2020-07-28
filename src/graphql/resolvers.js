@@ -293,14 +293,14 @@ const resolvers = {
 
     createProject: async (_, { title, content }, context) => {
       const user = checkAuth(context);
-
+      console.log('user');
       console.log(user);
 
-      // const onwer = new User({
-      // 	email: currentUser.email,
-      // 	username: currentUser.username,
-      // 	picture: currentUser.picture,
-      // });
+      // 교차검증
+      const onwer = await User.findOne({ email: user.email });
+
+      console.log('owner');
+      console.log(owner);
 
       if (title.trim() === '') {
         throw new Error('Project title must not be empty');
@@ -312,11 +312,12 @@ const resolvers = {
       const newProject = new Project({
         title,
         content,
-        owner: user,
+        owner: onwer,
         updated: new Date().toISOString(),
       });
 
       const project = await newProject.save();
+      console.log('project');
       console.log(project);
 
       // context.pubsub.publish('NEW_Project', {
