@@ -6,7 +6,7 @@ const projectSchema = new Schema({
 	updated: { type: Date, default: Date.now },
 	owner: {
 		type: Schema.Types.ObjectId,
-		ref: 'users',
+		ref: 'User',
 	},
 });
 

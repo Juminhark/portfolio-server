@@ -652,6 +652,43 @@ authorizeWithGoogle: async (_, { code }) => {
 - 3.  Click Remove access and then click Ok to confirm
 - 4.  The next OAuth2 request you make will return a refresh_token (providing that it also includes the 'access_type=offline' query parameter.
 
+## mongoose - populate
+
+```sh
+{
+  _id: 5f2ba88a9d1d941d582ad35a,
+  title: 'test_title',
+  content: 'test_content',
+  owner: 5f116e83a5fea4171c9cfd9f,
+  updated: 2020-08-06T06:51:54.729Z,
+  __v: 0
+}
+
+// 위와 같이 owner: 5f116e83a5fea4171c9cfd9f
+// user를 찾아내어 표시하지 못하고 있다.
+```
+
+```ts
+const project = await Project.findById(projectId).populate('owner');
+```
+
+```sh
+{
+  _id: 5f2ba88a9d1d941d582ad35a,
+  title: 'test_title',
+  content: 'test_content',
+  owner: {
+    projects: [],
+    _id: 5f116e83a5fea4171c9cfd9f,
+    email: 'wnalsgkr@gmail.com',
+    username: '주민학',
+    __v: 0
+  },
+  updated: 2020-08-06T06:51:54.729Z,
+  __v: 0
+}
+```
+
 ## reference
 
 - [`heroku - dotenv`](https://velog.io/@suseodd/Heroku%EC%97%90-.env%ED%8C%8C%EC%9D%BC-%EC%A0%81%EC%9A%A9-20k621f03d)

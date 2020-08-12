@@ -48,7 +48,9 @@ const resolvers = {
 		getProjects: async () => {
 			try {
 				// sort() => Project list 순서 교정
-				const projects = await Project.find().sort({ createdAt: -1 });
+				const projects = await Project.find()
+					.sort({ createdAt: -1 })
+					.populate('owner');
 				return projects;
 			} catch (err) {
 				throw new Error(err);
@@ -56,7 +58,7 @@ const resolvers = {
 		},
 		getProject: async (_, { projectId }) => {
 			try {
-				const project = await Project.findById(projectId);
+				const project = await Project.findById(projectId).populate('owner');
 				if (project) {
 					return project;
 				} else {
@@ -192,8 +194,6 @@ const resolvers = {
 
 			const userData = await userRes.json();
 
-			console.log(userData);
-
 			const currentUser = {
 				username: userData.name,
 				email: userData.email,
@@ -209,7 +209,6 @@ const resolvers = {
 
 			if (user) {
 				const token = generateToken(user);
-				console.log(user._doc);
 				return {
 					...user._doc,
 					id: user._id,
@@ -264,7 +263,6 @@ const resolvers = {
 
 			if (user) {
 				const token = generateToken(user);
-				console.log(user._doc);
 				return {
 					...user._doc,
 					id: user._id,
@@ -293,15 +291,9 @@ const resolvers = {
 
 		createProject: async (_, { title, content }, context) => {
 			const user = checkAuth(context);
-			console.log('user');
-			console.log(user);
 
 			// 교차검증
 			const owner = await User.findOne({ email: user.email });
-
-			console.log('owner');
-			console.log(owner);
-
 			if (title.trim() === '') {
 				throw new Error('Project title must not be empty');
 			}
@@ -317,8 +309,6 @@ const resolvers = {
 			});
 
 			const project = await newProject.save();
-			console.log('project');
-			console.log(project);
 
 			// context.pubsub.publish('NEW_Project', {
 			// 	newProject: project,
@@ -327,17 +317,11 @@ const resolvers = {
 			return project;
 		},
 
-		deleteProject: async (_, { projectId }, context) => {
-			const user = checkAuth(context);
-
+		deleteProject: async (_, { projectId }) => {
 			try {
-				const project = await Project.findById(projectId);
-				if (project.owner === user) {
-					await project.delete();
-					return 'Project deleted successfully';
-				} else {
-					throw new AuthenticationError('Action not allowed');
-				}
+				console.log(projectId);
+				await Project.deleteOne({ _id: projectId });
+				return 'Project deleted successfully';
 			} catch (err) {
 				throw new Error(err);
 			}
