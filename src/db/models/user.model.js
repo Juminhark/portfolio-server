@@ -5,7 +5,12 @@ const userSchema = new Schema({
 	email: { type: String, required: true, index: true, unique: true },
 	password: String,
 	picture_url: String,
-	github_url: String,
+	social: {
+		github: String,
+		facebook: String,
+		instagram: String,
+		website: String,
+	},
 	projects: [{ type: Schema.Types.ObjectId, ref: 'Project' }],
 });
 

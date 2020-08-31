@@ -198,7 +198,9 @@ const resolvers = {
 				username: userData.name,
 				email: userData.email,
 				picture_url: userData.avatar_url,
-				github_url: userData.html_url,
+				// social: {
+				// 	github: userData.html_url,
+				// },
 			};
 
 			// todo: Oauth로 접속한 user가 회원가입하지 않은 사람이라면?
@@ -206,20 +208,29 @@ const resolvers = {
 			// todo: 이미 가입한 회원이라면 회원 정보를 가져다 준다.
 
 			const user = await User.findOne({ email: currentUser.email });
+			console.log(user);
 
 			if (user) {
 				const token = generateToken(user);
+				console.log({
+					...user._doc,
+					id: user._id,
+					picture_url: currentUser.picture_url,
+					token,
+				});
 				return {
 					...user._doc,
 					id: user._id,
-					picture: currentUser.picture,
+					picture_url: currentUser.picture_url,
+					social: currentUser.social,
 					token,
 				};
 			} else {
 				const newUser = new User({
 					email: currentUser.email,
 					username: currentUser.username,
-					picture: currentUser.picture,
+					picture_url: currentUser.picture_url,
+					social: currentUser.social,
 				});
 
 				// TODO: Save the user
@@ -267,6 +278,7 @@ const resolvers = {
 					...user._doc,
 					id: user._id,
 					picture_url: currentUser.picture_url,
+					social: user.social,
 					token,
 				};
 			} else {
